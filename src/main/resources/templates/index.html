@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{index.title}"></title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
+    <script src="/webjars/jquery/3.2.1/jquery.js"></script>
+    <script src="/webjars/bootstrap/3.3.7-1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/index.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="hero-unit">
+        <div th:if="${message}">
+            <h2 th:text="${message}"/>
+        </div>
+
+        <h1 th:text="#{index.header}"></h1>
+
+        <div id="viewUser" class="modal fade" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close"
+                                data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                            <span class="sr-only" th:text="#{add.contact.cancel}"></span>
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel" th:text="#{add.contact.title}">
+                        </h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <div th:if="${message}">
+                            <h3 th:text="${message}" class="alert alert-danger"/>
+                        </div>
+                        <form id="addContactForm" th:action="@{/contact/add}"
+                               method="POST">
+                            <label id="modalMessage" th:text="#{add.contact.name}">:</label>
+                            <input type="text" name="name"/>
+                            <br/><br/>
+                            <label th:text="#{add.contact.url}">:</label>
+                            <input type="text" name="url"/>
+                            <br/><br/>
+                            <input type="submit" id="addModalBtn" th:value="#{add.contact.submit}"
+                                   class="btn btn-large btn-success"/>
+                            <input type="button" class="btn btn-large btn-success" data-dismiss="modal"
+                                   th:value="#{add.contact.cancel}"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br/>
+        <div>
+            <table>
+                <tr>
+                    <td>
+                        <input type="text" th:value="${search}" th:name="search" id="search"/>
+                    </td>
+                    <td>
+                        <a id="searchBtn" th:href="@{/(search='')}" th:text="Search" class="btn btn-large btn-success"></a>
+                    </td>
+                    <td>
+                        <a href="addContact" th:text="#{index.add.contact}" class="btn btn-large btn-success"></a>
+                    </td>
+                    <td>
+                        <a href="uploadFile" th:text="#{index.open.file}" class="btn btn-large btn-success"></a>
+                    </td>
+                    <td>
+                        <a href="cleanContacts" th:text="#{index.clean.contacts}" class="btn btn-large btn-success"></a>
+                    </td>
+                </tr>
+            </table>
+
+            <table id="contactTable" border="1" class="table">
+                <thead>
+                <tr>
+                    <th th:text="#{index.contact.list.name}"></th>
+                    <th th:text="#{index.contact.list.avatar}"></th>
+                </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+
+            <div class="table-pagination">
+                <ul class="pagination">
+                    <li th:class="${contactPage.number eq 0} ? 'disabled' : ''">
+                        <a id="pageFirst" th:if="${not (contactPage.number eq 0)}" th:href="@{${'/index'}(page=1,search='')}"
+                           th:text="#{index.pagination.first}"></a>
+                        <a th:if="${contactPage.number eq 0}" href="javascript:void(0);"
+                           th:text="#{index.pagination.first}"></a>
+                    </li>
+
+                    <li th:class="${contactPage.number eq 0} ? 'disabled' : ''">
+                        <a id="pagePrev" th:if="${not (contactPage.number eq 0)}" th:href="@{${'/index'}(page=${contactPage.number},search='')}"
+                           th:text="#{index.pagination.previous}"></a>
+                        <a th:if="${contactPage.number eq 0}" href="javascript:void(0);"
+                           th:text="#{index.pagination.previous}"></a>
+                    </li>
+
+                    <li class="active">
+                        <a th:text="|${contactPage.number + 1} of ${contactPage.totalPages}|" href="#"></a>
+                    </li>
+                    <!-- todo: consider improving it so that only 5 current page links are visible-->
+                    <!--<li th:each="pageNo : ${#numbers.sequence(0, contactPage.totalPages - 1)}"-->
+                        <!--th:class="${contactPage.number eq pageNo}? 'active' : ''">-->
+                        <!--<a th:if="${contactPage.number  eq pageNo}" href="#">-->
+                            <!--<span th:text="${pageNo + 1}"></span>-->
+                        <!--</a>-->
+                        <!--<a th:if="${not (contactPage.number  eq pageNo)}" th:href="@{${'/index'}(page=${pageNo + 1})}">-->
+                            <!--<span th:text="${pageNo + 1}"></span>-->
+                        <!--</a>-->
+                    <!--</li>-->
+                    <li th:class="${contactPage.number ge contactPage.totalPages - 1} ? 'disabled' : ''">
+                        <a id="pageNext" th:if="${not (contactPage.number ge contactPage.totalPages - 1)}"
+                           th:href="@{${'/index'}(page=${contactPage.number + 2},search='')}"
+                           th:text="#{index.pagination.next}"></a>
+                        <a th:if="${contactPage.number ge contactPage.totalPages - 1}" href="javascript:void(0);"
+                           th:text="#{index.pagination.next}"></a>
+                    </li>
+                    <li th:class="${contactPage.number ge contactPage.totalPages - 1} ? 'disabled' : ''">
+                        <a id="pageLast" th:if="${not (contactPage.number ge contactPage.totalPages - 1)}"
+                           th:href="@{${'/index'}(page=${contactPage.totalPages},search='')}"
+                           th:text="#{index.pagination.last}"></a>
+                        <a th:if="${contactPage.number ge contactPage.totalPages - 1}" href="javascript:void(0);"
+                           th:text="#{index.pagination.last}"></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <br/><br/>
+    </div>
+</div>
+</body>
+</html>
